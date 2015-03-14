@@ -16,7 +16,7 @@ tuning.sgPLS.X <- function(X,Y,folds=10,validation=c("Mfold","loo"),ncomp,keepX=
         res.perf.sgpls <- try(perf(model.sgpls,criterion="MSEP",validation=validation,folds = folds,setseed=choicesetseed,progressBar=progressBar),silent=FALSE)
         if (class(res.perf.sgpls)[1]=="try-error"){ cond <- TRUE;choicesetseed=choicesetseed+1 } else {cond <- FALSE}
       }  
-      res[k,l] <- sum(res.perf.sgpls$MSEP)
+      res[k,l] <- sum(res.perf.sgpls$MSEP[,ncomp])
     }
     l <- 0
   }

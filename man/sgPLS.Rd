@@ -87,7 +87,7 @@ In: Krishnaiah, P. R. (editors), \emph{Multivariate Analysis}. Academic Press, N
 
 \author{Benoit Liquet and Pierre Lafaye de Micheaux.}
 
-\seealso{\code{\link{sPLS}}, \code{\link{sgPLS}}, \code{\link{predict}}, \code{\link{perf}} and functions from \code{mixOmics} package: \code{summary}, \code{plotIndiv}, \code{plotVar}, \code{plot3dIndiv}, \code{plot3dVar}, and \url{http://www.math.univ-toulouse.fr/~biostat/mixOmics/} for more details.}
+\seealso{\code{\link{sPLS}}, \code{\link{sgPLS}}, \code{\link{predict}}, \code{\link{perf}} and functions from \code{mixOmics} package: \code{summary}, \code{plotIndiv}, \code{plotVar}, \code{plot3dIndiv}, \code{plot3dVar}.}
 
 \examples{
 \dontrun{	

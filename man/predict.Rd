@@ -51,7 +51,7 @@ Tenenhaus, M. (1998). \emph{La r\'egression PLS: th\'eorie et pratique}. Paris: 
 \author{Benoit Liquet and Pierre Lafaye de Micheaux}
 
 
-\seealso{\code{\link{sPLS}}, \code{\link{gPLS}}, \code{\link{sgPLS}} and \url{http://www.math.univ-toulouse.fr/~biostat/mixOmics/} for more details.}
+\seealso{\code{\link{sPLS}}, \code{\link{gPLS}}, \code{\link{sgPLS}}.}
 
 
 \keyword{regression}

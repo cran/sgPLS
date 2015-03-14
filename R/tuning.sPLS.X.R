@@ -12,7 +12,7 @@ tuning.sPLS.X <- function(X,Y,folds=10,validation=c("Mfold","loo"),ncomp,keepX=N
       res.perf.spls <- try(perf(model.spls,criterion="MSEP",validation=validation,folds = folds,setseed=choicesetseed,progressBar=progressBar),silent=FALSE)
       if (class(res.perf.spls)[1]=="try-error"){ cond <- TRUE;choicesetseed=choicesetseed+1 } else {cond <- FALSE}
     }  
-    res[k] <- sum(res.perf.spls$MSEP)
+    res[k] <- sum(res.perf.spls$MSEP[,ncomp])
   }
   
   ind <- which.min(res)
