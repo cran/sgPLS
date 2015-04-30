@@ -115,8 +115,8 @@ perf.sPLS <-
         
         # added: record selected features in each set
         for(k in 1:ncomp){
-          featuresX[[k]] = c(unlist(featuresX[[k]]), select.var(spls.res, comp = k)$name.X)
-          featuresY[[k]] = c(unlist(featuresY[[k]]), select.var(spls.res, comp = k)$name.Y)
+          featuresX[[k]] = c(unlist(featuresX[[k]]), selectVar(spls.res, comp = k)$name.X)
+          featuresY[[k]] = c(unlist(featuresY[[k]]), selectVar(spls.res, comp = k)$name.Y)
         }
         
         
@@ -193,8 +193,8 @@ perf.sPLS <-
     # extract features selected from the full model ---------
     features.finalX = features.finalY =list()
     for(k in 1:ncomp){
-      features.finalX[[k]] = select.var(object, comp = k)$value.X
-      features.finalY[[k]] = select.var(object, comp = k)$value.Y
+      features.finalX[[k]] = selectVar(object, comp = k)$value.X
+      features.finalY[[k]] = selectVar(object, comp = k)$value.Y
     }
     
     names(features.finalX)  = names(features.finalY) = names(list.featuresX) = names(list.featuresX) = paste('comp', 1:ncomp)
@@ -344,8 +344,8 @@ perf.gPLS <-
         
         # added: record selected features in each set
         for(k in 1:ncomp){
-          featuresX[[k]] = c(unlist(featuresX[[k]]), select.var(spls.res, comp = k)$name.X)
-          featuresY[[k]] = c(unlist(featuresY[[k]]), select.var(spls.res, comp = k)$name.Y)
+          featuresX[[k]] = c(unlist(featuresX[[k]]), selectVar(spls.res, comp = k)$name.X)
+          featuresY[[k]] = c(unlist(featuresY[[k]]), selectVar(spls.res, comp = k)$name.Y)
         }
         
         
@@ -422,8 +422,8 @@ perf.gPLS <-
     # extract features selected from the full model ---------
     features.finalX = features.finalY =list()
     for(k in 1:ncomp){
-      features.finalX[[k]] = select.var(object, comp = k)$value.X
-      features.finalY[[k]] = select.var(object, comp = k)$value.Y
+      features.finalX[[k]] = selectVar(object, comp = k)$value.X
+      features.finalY[[k]] = selectVar(object, comp = k)$value.Y
     }
     
     names(features.finalX)  = names(features.finalY) = names(list.featuresX) = names(list.featuresX) = paste('comp', 1:ncomp)
@@ -579,8 +579,8 @@ perf.sgPLS <-
         #res.sparse <- s
         # added: record selected features in each set
         for(k in 1:ncomp){
-          featuresX[[k]] = c(unlist(featuresX[[k]]), select.var(spls.res, comp = k)$name.X)
-          featuresY[[k]] = c(unlist(featuresY[[k]]), select.var(spls.res, comp = k)$name.Y)
+          featuresX[[k]] = c(unlist(featuresX[[k]]), selectVar(spls.res, comp = k)$name.X)
+          featuresY[[k]] = c(unlist(featuresY[[k]]), selectVar(spls.res, comp = k)$name.Y)
         }
         
         
@@ -657,8 +657,8 @@ perf.sgPLS <-
     # extract features selected from the full model ---------
     features.finalX = features.finalY =list()
     for(k in 1:ncomp){
-      features.finalX[[k]] = select.var(object, comp = k)$value.X
-      features.finalY[[k]] = select.var(object, comp = k)$value.Y
+      features.finalX[[k]] = selectVar(object, comp = k)$value.X
+      features.finalY[[k]] = selectVar(object, comp = k)$value.Y
     }
     
     names(features.finalX)  = names(features.finalY) = names(list.featuresX) = names(list.featuresX) = paste('comp', 1:ncomp)
