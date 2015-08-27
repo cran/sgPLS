@@ -134,7 +134,7 @@ ind.block.y <- seq(20, 480, 20)
 model.sgPLS <- sgPLS(X, Y, ncomp = 2, mode = "regression", keepX = c(4, 4), 
                    keepY = c(4, 4), ind.block.x = ind.block.x
                    ,ind.block.y = ind.block.y,
-                   alpha.x = c(0.5, 0.5), alpha.y = c(0.5, 0.5))
+                   alpha.x = c(0.95, 0.95), alpha.y = c(0.95, 0.95))
 
 result.sgPLS <- select.sgpls(model.sgPLS)
 result.sgPLS$group.size.X

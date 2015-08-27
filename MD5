@@ -1,5 +1,5 @@
-52438f25c05fd7e8ede73b0b40de60ac *DESCRIPTION
-6de8cf7f67915e7ea3696ee485e3f5f7 *NAMESPACE
+6ea06112d425417b4f827496ee980f47 *DESCRIPTION
+5b571c81ca7fdd0d276858dfd0cad600 *NAMESPACE
 2dde43fc029e761f6462ce69ee6dc54b *R/gPLS.R
 6023a636f9da978fb42b49e524c91064 *R/per.variance.R
 8654ab278c1fba65f19380b578d747aa *R/perf.R
@@ -8,7 +8,7 @@ dfe47c6538f62a3d6f2f2d8432298f5b *R/predict.R
 a53d01bf1fce444bcbf01d1f564da85f *R/sPLS.R
 a28c4aa5d4faf56f2537a8e47dcb32d6 *R/select.sgpls.R
 2fd8efd7db26992049020be09f317e3a *R/select.spls.R
-e53a0039c4633fd27f61a9f456de681f *R/sgPLS-internal.R
+e4af060c54bb86bf11f8aaabcc25b4b5 *R/sgPLS-internal.R
 3466aed9b152e42c2d6d39ec20285b25 *R/sgPLS.R
 407e42466e4e4b4e522ae7bb59a66395 *R/tuning.gPLS.X.R
 f6faf49a6b5959f053e8a28c6c5a3ace *R/tuning.sPLS.X.R
@@ -23,7 +23,7 @@ f0b7f80e62784743fbfc9ceccaaea0e8 *man/plotcim.Rd
 6d7a6e09fb5d6eee1b3ba931ee79cb68 *man/select.spls.Rd
 b5465f8077ab8536f9ca2b02dc630ebe *man/sgPLS-internal.Rd
 c0a19780a9b1232e369f9510b1fe1f9b *man/sgPLS-package.Rd
-cd5eaa03de8d71de961c16092eff49a4 *man/sgPLS.Rd
+976d41d59ebfc2b35d24264e2be3f5b7 *man/sgPLS.Rd
 eefde72017704bce4c7e4297b5e78509 *man/tuning.gPLS.X.Rd
 89f5df4bdb97b6dd490c08cf27646cef *man/tuning.sPLS.X.Rd
 8458836ac670e36d9c6bd47c4cdbf6b8 *man/tuning.sgPLS.X.Rd

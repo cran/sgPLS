@@ -1,18 +1,23 @@
 normv <- function(x) sqrt(sum(x**2))
 
 soft.thresholding <- function(x,lambda){
-  y <- abs(x)-lambda  
-  ind <- (y>0)*1
-  return(sign(x)*ind*y)  
+  tol <- .Machine$double.eps ^ 0.5 
+  y <- abs(x)-lambda 
+  test  <- y < tol
+  return(sign(x)*y*(1-test))  
 }  
+
+ 
 
 soft.thresholding.group <- function(x,ind,lambda){
   tab.ind <- c(0,ind,length(x))
+  tol <- .Machine$double.eps ^ 0.5 
   res <- NULL
   for (i in 1:(length(ind)+1)){
     ji <- tab.ind[i+1]-tab.ind[i]  
     vecx <- x[((tab.ind[i]+1):tab.ind[i+1])]
-    y <- ((1-(lambda/2)*sqrt(ji)/normv(vecx))>0)*1
+    y <- 1-(lambda/2)*sqrt(ji)/normv(vecx)
+    if(y < tol) y <- 0
     res <- c(res,vecx*y)  
   }
   return(res)    
@@ -28,7 +33,7 @@ soft.thresholding.sparse.group <- function(x,ind,lambda,alpha,ind.block.zero){
     vecx <- x[((tab.ind[i]+1):tab.ind[i+1])]
     if(i%in%ind.block.zero) {vecx <- rep(0,ji)} else{
       temp <- soft.thresholding(vecx,lambda*alpha/2)
-      vecx <- 0.5*temp*(1-lambda*(1-alpha)*sqrt(length(vecx))/sum(temp**2)) 
+      vecx <- 0.5*temp*(1-lambda*(1-alpha)*sqrt(length(vecx))/sqrt(sum(temp**2))) 
     }
     res <- c(res,vecx)  
   }
@@ -38,7 +43,7 @@ soft.thresholding.sparse.group <- function(x,ind,lambda,alpha,ind.block.zero){
 
 
 lambda.quadra <- function(x,vec,alpha){
-  return(sum(soft.thresholding(vec,x*alpha/2)**2)-sqrt(length(vec))*alpha*x)  
+  return(sum(soft.thresholding(vec,x*alpha/2)**2)-length(vec)*((1-alpha)*x)**2)
 }
 
 step1.spls.sparsity <- function(X,Y,sparsity.x,sparsity.y,epsilon,iter.max){
