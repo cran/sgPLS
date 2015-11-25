@@ -1,4 +1,4 @@
-plotcim <- function (matX, matY,cexCol=0.5,cexRow=1) 
+plotcim <- function (matX, matY, cexCol = 0.5, cexRow = 1) 
 {
   labelY <- colnames(matY)
   mat.sim <- matrix(NA, ncol = dim(matX)[2], nrow = length(labelY))
@@ -7,5 +7,6 @@ plotcim <- function (matX, matY,cexCol=0.5,cexRow=1)
       mat.sim[j, i] <- cor(matX[, i], matY[, j])
     }
   }
-  cim(mat.sim, labRow = labelY, labCol = colnames(matX),cexCol=cexCol,cexRow=cexRow)
+  cim(mat.sim, row.names = labelY, col.names = colnames(matX), col.cex = cexCol, 
+      row.cex = cexRow)
 }

@@ -87,7 +87,7 @@ Regression (PCR) and Partial Least Squares Regression (PLSR). \emph{Journal of C
 
 \author{Benoit Liquet and Pierre Lafaye de Micheaux}
 
-\seealso{\code{\link{predict}}, \code{plot.perf} (from package \code{mixOmics}) and \url{http://perso.math.univ-toulouse.fr/mixomics/} for more details.}
+\seealso{\code{\link{predict}}, \code{plot.perf} (from package \code{mixOmics})}
 
 \examples{
 ## validation for objects of class 'sPLS' (regression)
