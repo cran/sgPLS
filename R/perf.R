@@ -115,8 +115,8 @@ perf.sPLS <-
         
         # added: record selected features in each set
         for(k in 1:ncomp){
-          featuresX[[k]] = c(unlist(featuresX[[k]]), selectVar(spls.res, comp = k)$name.X)
-          featuresY[[k]] = c(unlist(featuresY[[k]]), selectVar(spls.res, comp = k)$name.Y)
+          featuresX[[k]] = c(unlist(featuresX[[k]]), selectVar(spls.res, comp = k)$X$name)
+          featuresY[[k]] = c(unlist(featuresY[[k]]), selectVar(spls.res, comp = k)$Y$name)
         }
         
         
@@ -193,11 +193,11 @@ perf.sPLS <-
     # extract features selected from the full model ---------
     features.finalX = features.finalY =list()
     for(k in 1:ncomp){
-      features.finalX[[k]] = selectVar(object, comp = k)$value.X
-      features.finalY[[k]] = selectVar(object, comp = k)$value.Y
+      features.finalX[[k]] = selectVar(object, comp = k)$X$value
+      features.finalY[[k]] = selectVar(object, comp = k)$Y$value
     }
     
-    names(features.finalX)  = names(features.finalY) = names(list.featuresX) = names(list.featuresX) = paste('comp', 1:ncomp)
+    names(features.finalX)  = names(features.finalY) = names(list.featuresX) = names(list.featuresY) = paste('comp', 1:ncomp)
     
     
     # ----------  final outputs:
@@ -344,8 +344,8 @@ perf.gPLS <-
         
         # added: record selected features in each set
         for(k in 1:ncomp){
-          featuresX[[k]] = c(unlist(featuresX[[k]]), selectVar(spls.res, comp = k)$name.X)
-          featuresY[[k]] = c(unlist(featuresY[[k]]), selectVar(spls.res, comp = k)$name.Y)
+          featuresX[[k]] = c(unlist(featuresX[[k]]), selectVar(spls.res, comp = k)$X$name)
+          featuresY[[k]] = c(unlist(featuresY[[k]]), selectVar(spls.res, comp = k)$Y$name)
         }
         
         
@@ -422,8 +422,8 @@ perf.gPLS <-
     # extract features selected from the full model ---------
     features.finalX = features.finalY =list()
     for(k in 1:ncomp){
-      features.finalX[[k]] = selectVar(object, comp = k)$value.X
-      features.finalY[[k]] = selectVar(object, comp = k)$value.Y
+      features.finalX[[k]] = selectVar(object, comp = k)$X$value
+      features.finalY[[k]] = selectVar(object, comp = k)$Y$value
     }
     
     names(features.finalX)  = names(features.finalY) = names(list.featuresX) = names(list.featuresX) = paste('comp', 1:ncomp)
@@ -579,8 +579,8 @@ perf.sgPLS <-
         #res.sparse <- s
         # added: record selected features in each set
         for(k in 1:ncomp){
-          featuresX[[k]] = c(unlist(featuresX[[k]]), selectVar(spls.res, comp = k)$name.X)
-          featuresY[[k]] = c(unlist(featuresY[[k]]), selectVar(spls.res, comp = k)$name.Y)
+          featuresX[[k]] = c(unlist(featuresX[[k]]), selectVar(spls.res, comp = k)$X$name)
+          featuresY[[k]] = c(unlist(featuresY[[k]]), selectVar(spls.res, comp = k)$Y$name)
         }
         
         
@@ -657,8 +657,8 @@ perf.sgPLS <-
     # extract features selected from the full model ---------
     features.finalX = features.finalY =list()
     for(k in 1:ncomp){
-      features.finalX[[k]] = selectVar(object, comp = k)$value.X
-      features.finalY[[k]] = selectVar(object, comp = k)$value.Y
+      features.finalX[[k]] = selectVar(object, comp = k)$X$value
+      features.finalY[[k]] = selectVar(object, comp = k)$Y$value
     }
     
     names(features.finalX)  = names(features.finalY) = names(list.featuresX) = names(list.featuresX) = paste('comp', 1:ncomp)
@@ -686,4 +686,462 @@ perf.sgPLS <-
     class(res) = c("perf", method)
     return(invisible(res))
   }
+
+# ---------------------------------------------------
+# perf for splsda object
+# ---------------------------------------------------
+perf.sPLSda <- function(object,                                               
+                        method.predict = c("all", "max.dist", "centroids.dist", "mahalanobis.dist"),     
+                        validation = c("Mfold", "loo"),                                          
+                        folds = 10,                                                              
+                        progressBar = TRUE,...)                                                        
+{
+  
+  #-- initialising arguments --#
+  # these data are the centered and scaled X output or the unmapped(Y) scaled and centered
+  X = object$X
+  level.Y = object$names$Y  #to make sure the levels are ordered
+  Y = object$ind.mat
+  Y = map(Y)
+  Y = factor(Y,labels = level.Y)
+  ncomp = object$ncomp
+  n = nrow(X)
+  keepX = object$keepX  
+  
+  tol = object$tol
+  max.iter = object$max.iter
+  
+  # initialize new objects:
+  features <- list()
+  for(k in 1:ncomp){
+    features[[k]] = NA
+  }
+  
+  method.predict = match.arg(method.predict, choices = c("all", "max.dist", "centroids.dist", "mahalanobis.dist"), several.ok = TRUE)
+  if (any(method.predict == "all")) nmthdd = 3 
+  else nmthdd = length(method.predict)  
+  
+  
+ 
+  
+  
+  error.fun = function(x, y) {
+    error.vec = sweep(x, 1, y, FUN = "-")
+    error.vec = (error.vec != 0)
+    error.vec = apply(error.vec, 2, sum) / length(y)
+    return(error.vec)
+  }
+  
+  #-- define the folds --#
+  if (validation == "Mfold") {
+    if (is.list(folds)) {
+      if (length(folds) < 2 | length(folds) > n)
+        stop("Invalid number of folds.")
+      if (length(unique(unlist(folds))) != n)
+        stop("Invalid folds.")
+      
+      M = length(folds)
+    }
+    else {
+      if (is.null(folds) || !is.numeric(folds) || folds < 2 || folds > n)
+        stop("Invalid number of folds.")
+      else {
+        M = round(folds)
+        folds = split(sample(1:n), rep(1:M, length = n)) 
+      }
+    }
+  } 
+  else { 
+    folds = split(1:n, rep(1:n, length = n)) 
+    M = n
+  }
+  
+  
+  error.mat = array(0, dim = c(ncomp, nmthdd, M))
+  
+  # in case the test set only includes one sample, it is better to advise the user to perform loocv
+  stop.user = FALSE
+  # set up a progress bar
+  if (progressBar == TRUE) pb <- txtProgressBar(style = 3)
+  
+  for (i in 1:M) {
+    if (progressBar == TRUE) setTxtProgressBar(pb, i/M)
+    
+    #set up leave out samples.
+    omit = folds[[i]]
+    
+    # see below, we stop the user if there is only one sample drawn on the test set using MFold
+    if(length(omit) == 1) stop.user = TRUE
+    
+    # the training set is NOT scaled
+    X.train = X[-omit, ]
+    Y.train = Y[-omit]
+    X.test = matrix(X[omit, ], nrow = length(omit))
+    
+    spls.res = sPLSda(X.train, Y.train, ncomp, max.iter = max.iter , tol = tol, keepX=keepX)  
+    # added: record selected features
+    for(k in 1:ncomp){
+      features[[k]] = c(unlist(features[[k]]), selectVar(spls.res, comp = k)$name)
+    }
+    
+    if (!is.null(spls.res$nzv$Position)) X.test = X.test[, -spls.res$nzv$Position]
+    Y.predict = predict(spls.res, X.test, method = method.predict)$class
+    error.mat[, , i] = sapply(Y.predict, error.fun, y = as.numeric(Y[omit]))
+    
+    
+  } # end loop on i
+  
+  # warn the user that at least test set had a length of 1
+  if(stop.user == TRUE & validation == 'Mfold') stop('The folds value was set too high to perform cross validation. Choose validation = "loo" or set folds to a lower value')
+  
+  if (progressBar == TRUE) cat('\n')
+  
+  #-- compute the error --#
+  res = apply(error.mat, 1:2, mean)
+  
+  rownames(res) = paste('ncomp', 1:ncomp, sep = " ")
+  colnames(res) = names(Y.predict)
+  
+  # ---- extract stability of features ----- # NEW
+  list.features = list()
+  for(k in 1:ncomp){
+    #remove the NA value that was added for initialisation
+    remove.na = which(is.na(features[[k]]))
+    # then summarise as a factor and output the percentage of appearance
+    list.features[[k]] = sort(table(as.factor(features[[k]][-remove.na]))/M, decreasing = TRUE)
+  }
+  
+
+  
+  names(list.features) = paste('comp', 1:ncomp)
+  
+  result = list()
+  result$error.rate = res
+  result$features$stable = list.features
+  
+  # added
+ # result$nzvX = nzv$Position
+  
+  
+  method = "plsda.mthd"
+  result$meth = "splsda.mthd"
+  class(result) = c("perf", method)
+  #updated outputs
+  return(invisible(result))
+}
+
+
+# ---------------------------------------------------
+# perf for sgplsda object
+# ---------------------------------------------------
+perf.sgPLSda <- function(object,                                               
+                        method.predict = c("all", "max.dist", "centroids.dist", "mahalanobis.dist"),     
+                        validation = c("Mfold", "loo"),                                          
+                        folds = 10,                                                              
+                        progressBar = TRUE,...)                                                        
+{
+  
+  #-- initialising arguments --#
+  # these data are the centered and scaled X output or the unmapped(Y) scaled and centered
+  X = object$X
+  level.Y = object$names$Y  #to make sure the levels are ordered
+  Y = object$ind.mat
+  Y = map(Y)
+  Y = factor(Y,labels = level.Y)
+  ncomp = object$ncomp
+  n = nrow(X)
+  keepX = object$keepX  
+  
+  # tells which variables are selected in X and in Y:
+    
+    
+    ind.block.x = object$ind.block.x
+    ind.block.y = object$ind.block.y
+    alpha.x = object$alpha.x
+    alpha.y = object$alpha.y
+    upper.lambda = object$upper.lambda
+  
+  
+  
+  tol = object$tol
+  max.iter = object$max.iter
+  
+  # initialize new objects:
+  features <- list()
+  for(k in 1:ncomp){
+    features[[k]] = NA
+  }
+  
+  method.predict = match.arg(method.predict, choices = c("all", "max.dist", "centroids.dist", "mahalanobis.dist"), several.ok = TRUE)
+  if (any(method.predict == "all")) nmthdd = 3 
+  else nmthdd = length(method.predict)  
+  
+  
+   
+  
+  error.fun = function(x, y) {
+    error.vec = sweep(x, 1, y, FUN = "-")
+    error.vec = (error.vec != 0)
+    error.vec = apply(error.vec, 2, sum) / length(y)
+    return(error.vec)
+  }
+  
+  #-- define the folds --#
+  if (validation == "Mfold") {
+    if (is.list(folds)) {
+      if (length(folds) < 2 | length(folds) > n)
+        stop("Invalid number of folds.")
+      if (length(unique(unlist(folds))) != n)
+        stop("Invalid folds.")
+      
+      M = length(folds)
+    }
+    else {
+      if (is.null(folds) || !is.numeric(folds) || folds < 2 || folds > n)
+        stop("Invalid number of folds.")
+      else {
+        M = round(folds)
+        folds = split(sample(1:n), rep(1:M, length = n)) 
+      }
+    }
+  } 
+  else { 
+    folds = split(1:n, rep(1:n, length = n)) 
+    M = n
+  }
+  
+  
+  error.mat = array(0, dim = c(ncomp, nmthdd, M))
+  
+  # in case the test set only includes one sample, it is better to advise the user to perform loocv
+  stop.user = FALSE
+  # set up a progress bar
+  if (progressBar == TRUE) pb <- txtProgressBar(style = 3)
+  
+  for (i in 1:M) {
+    if (progressBar == TRUE) setTxtProgressBar(pb, i/M)
+    
+    #set up leave out samples.
+    omit = folds[[i]]
+    
+    # see below, we stop the user if there is only one sample drawn on the test set using MFold
+    if(length(omit) == 1) stop.user = TRUE
+    
+    # the training set is NOT scaled
+    X.train = X[-omit, ]
+    Y.train = Y[-omit]
+    X.test = matrix(X[omit, ], nrow = length(omit))
+     
+    spls.res = sgPLSda(X = X.train,Y = Y.train, ncomp = ncomp , max.iter = max.iter, tol = tol, keepX=keepX, ind.block.x=ind.block.x, alpha.x = alpha.x, upper.lambda = upper.lambda)     ## change
+     
+    
+    
+    
+    # added: record selected features
+    for(k in 1:ncomp){
+      features[[k]] = c(unlist(features[[k]]), selectVar(spls.res, comp = k)$name)
+    }
+    
+    if (!is.null(spls.res$nzv$Position)) X.test = X.test[, -spls.res$nzv$Position]
+    Y.predict = predict(spls.res, X.test, method = method.predict)$class
+    error.mat[, , i] = sapply(Y.predict, error.fun, y = as.numeric(Y[omit]))
+    
+    
+  } # end loop on i
+  
+  # warn the user that at least test set had a length of 1
+  if(stop.user == TRUE & validation == 'Mfold') stop('The folds value was set too high to perform cross validation. Choose validation = "loo" or set folds to a lower value')
+  
+  if (progressBar == TRUE) cat('\n')
+  
+  #-- compute the error --#
+  res = apply(error.mat, 1:2, mean)
+  
+  rownames(res) = paste('ncomp', 1:ncomp, sep = " ")
+  colnames(res) = names(Y.predict)
+  
+  # ---- extract stability of features ----- # NEW
+  list.features = list()
+  for(k in 1:ncomp){
+    #remove the NA value that was added for initialisation
+    remove.na = which(is.na(features[[k]]))
+    # then summarise as a factor and output the percentage of appearance
+    list.features[[k]] = sort(table(as.factor(features[[k]][-remove.na]))/M, decreasing = TRUE)
+  }
+  
+
+  
+  names(list.features) = paste('comp', 1:ncomp)
+  
+  result = list()
+  result$error.rate = res
+  result$features$stable = list.features
+  
+  # added
+ # X = nzv$Position
+  
+  
+  method = "plsda.mthd"
+  result$meth = "splsda.mthd"
+  class(result) = c("perf", method)
+  #updated outputs
+  return(invisible(result))
+}
+
+# ---------------------------------------------------
+# perf for sgplsda object
+# ---------------------------------------------------
+perf.gPLSda <- function(object,                                               
+                        method.predict = c("all", "max.dist", "centroids.dist", "mahalanobis.dist"),     
+                        validation = c("Mfold", "loo"),                                          
+                        folds = 10,                                                              
+                        progressBar = TRUE,...)                                                        
+{
+  
+  #-- initialising arguments --#
+  # these data are the centered and scaled X output or the unmapped(Y) scaled and centered
+  X = object$X
+  level.Y = object$names$Y  #to make sure the levels are ordered
+  Y = object$ind.mat
+  Y = map(Y)
+  Y = factor(Y,labels = level.Y)
+  ncomp = object$ncomp
+  n = nrow(X)
+  keepX = object$keepX  
+  
+  # tells which variables are selected in X and in Y:
+    
+    
+    ind.block.x = object$ind.block.x
+    ind.block.y = object$ind.block.y
+    
+  
+  
+  
+  tol = object$tol
+  max.iter = object$max.iter
+  
+  # initialize new objects:
+  features <- list()
+  for(k in 1:ncomp){
+    features[[k]] = NA
+  }
+  
+  method.predict = match.arg(method.predict, choices = c("all", "max.dist", "centroids.dist", "mahalanobis.dist"), several.ok = TRUE)
+  if (any(method.predict == "all")) nmthdd = 3 
+  else nmthdd = length(method.predict)  
+  
+  
+   
+  
+  error.fun = function(x, y) {
+    error.vec = sweep(x, 1, y, FUN = "-")
+    error.vec = (error.vec != 0)
+    error.vec = apply(error.vec, 2, sum) / length(y)
+    return(error.vec)
+  }
+  
+  #-- define the folds --#
+  if (validation == "Mfold") {
+    if (is.list(folds)) {
+      if (length(folds) < 2 | length(folds) > n)
+        stop("Invalid number of folds.")
+      if (length(unique(unlist(folds))) != n)
+        stop("Invalid folds.")
+      
+      M = length(folds)
+    }
+    else {
+      if (is.null(folds) || !is.numeric(folds) || folds < 2 || folds > n)
+        stop("Invalid number of folds.")
+      else {
+        M = round(folds)
+        folds = split(sample(1:n), rep(1:M, length = n)) 
+      }
+    }
+  } 
+  else { 
+    folds = split(1:n, rep(1:n, length = n)) 
+    M = n
+  }
+  
+  
+  error.mat = array(0, dim = c(ncomp, nmthdd, M))
+  
+  # in case the test set only includes one sample, it is better to advise the user to perform loocv
+  stop.user = FALSE
+  # set up a progress bar
+  if (progressBar == TRUE) pb <- txtProgressBar(style = 3)
+  
+  for (i in 1:M) {
+    if (progressBar == TRUE) setTxtProgressBar(pb, i/M)
+    
+    #set up leave out samples.
+    omit = folds[[i]]
+    
+    # see below, we stop the user if there is only one sample drawn on the test set using MFold
+    if(length(omit) == 1) stop.user = TRUE
+    
+    # the training set is NOT scaled
+    X.train = X[-omit, ]
+    Y.train = Y[-omit]
+    X.test = matrix(X[omit, ], nrow = length(omit))
+     
+    spls.res = gPLSda(X = X.train,Y = Y.train, ncomp = ncomp , max.iter = max.iter, tol = tol, keepX=keepX, ind.block.x=ind.block.x)     ## change
+     
+    
+    
+    
+    # added: record selected features
+    for(k in 1:ncomp){
+      features[[k]] = c(unlist(features[[k]]), selectVar(spls.res, comp = k)$name)
+    }
+    
+    if (!is.null(spls.res$nzv$Position)) X.test = X.test[, -spls.res$nzv$Position]
+    Y.predict = predict(spls.res, X.test, method = method.predict)$class
+    error.mat[, , i] = sapply(Y.predict, error.fun, y = as.numeric(Y[omit]))
+    
+    
+  } # end loop on i
+  
+  # warn the user that at least test set had a length of 1
+  if(stop.user == TRUE & validation == 'Mfold') stop('The folds value was set too high to perform cross validation. Choose validation = "loo" or set folds to a lower value')
+  
+  if (progressBar == TRUE) cat('\n')
+  
+  #-- compute the error --#
+  res = apply(error.mat, 1:2, mean)
+  
+  rownames(res) = paste('ncomp', 1:ncomp, sep = " ")
+  colnames(res) = names(Y.predict)
+  
+  # ---- extract stability of features ----- # NEW
+  list.features = list()
+  for(k in 1:ncomp){
+    #remove the NA value that was added for initialisation
+    remove.na = which(is.na(features[[k]]))
+    # then summarise as a factor and output the percentage of appearance
+    list.features[[k]] = sort(table(as.factor(features[[k]][-remove.na]))/M, decreasing = TRUE)
+  }
+  
+
+  
+  names(list.features) = paste('comp', 1:ncomp)
+  
+  result = list()
+  result$error.rate = res
+  result$features$stable = list.features
+  
+  # added
+  #result$nzvX = nzv$Position
+  
+  
+  method = "plsda.mthd"
+  result$meth = "splsda.mthd"
+  class(result) = c("perf", method)
+  #updated outputs
+  return(invisible(result))
+}
+
+
 

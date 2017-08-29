@@ -4,12 +4,14 @@
 \alias{perf.sPLS}
 \alias{perf.gPLS}
 \alias{perf.sgPLS}
-
+\alias{perf.sPLSda}
+\alias{perf.gPLSda}
+\alias{perf.sgPLSda}
 
 \title{Compute evaluation criteria for PLS, sPLS, PLS-DA and sPLS-DA}
 
 \description{
-Function to evaluate the performance of the fitted sparse PLS, group PLS and sparse group PLS models using various criteria.
+Function to evaluate the performance of the fitted sparse PLS, group PLS, sparse group PLS, sparse PLS-DA, group PLS-DA and sparse group PLS-DA models using various criteria.
 }
 
 \usage{
@@ -29,14 +31,31 @@ Function to evaluate the performance of the fitted sparse PLS, group PLS and spa
           criterion = c("all", "MSEP", "R2", "Q2"), 
           validation = c("Mfold", "loo"), 
           folds = 10, progressBar = TRUE,setseed = 1, \ldots)
+          
+          
+\method{perf}{sPLSda}(object,
+          method.predict = c("all", "max.dist", "centroids.dist", "mahalanobis.dist"),
+          validation = c("Mfold", "loo"), 
+          folds = 10, progressBar = TRUE, \ldots)	
+
+\method{perf}{gPLSda}(object,
+          method.predict = c("all", "max.dist", "centroids.dist", "mahalanobis.dist"),
+          validation = c("Mfold", "loo"), 
+          folds = 10, progressBar = TRUE, \ldots)
+          
+\method{perf}{sgPLSda}(object,
+          method.predict = c("all", "max.dist", "centroids.dist", "mahalanobis.dist"),
+          validation = c("Mfold", "loo"), 
+          folds = 10, progressBar = TRUE, \ldots)                  
+          
+          
   
 }
 
 \arguments{
-  \item{object}{Object of class inheriting from \code{"sPLS"}, \code{"gPLS"}, 
-   or \code{"sgPLS"}. The function will retrieve some key parameters stored in that object.}
-    \item{criterion}{The criteria measures to be calculated (see Details). Can be set to either \code{"all"}, \code{"MSEP"}, \code{"R2"}, \code{"Q2"}. By default set to \code{"all"}.}
-
+  \item{object}{Object of class inheriting from \code{"sPLS"}, \code{"gPLS"}, \code{"sgPLS"}, \code{"sPLSda"}, \code{"gPLSda"} or \code{"sgPLSda"}. The function will retrieve some key parameters stored in that object.}
+    \item{criterion}{The criteria measures to be calculated (see Details). Can be set to either \code{"all"}, \code{"MSEP"}, \code{"R2"}, \code{"Q2"}. By default set to \code{"all"}. Only applies to an object inheriting from \code{"sPLS"}, \code{"gPLS"} or \code{"sgPLS"}}
+  \item{method.predict}{only applies to an object inheriting from \code{"PLSda"}, \code{"gPLSda"} or \code{"sgPLSda"} to evaluate the classification performance of the model. Should be a subset of \code{"max.dist"}, \code{"centroids.dist"}, \code{"mahalanobis.dist"}. Default is \code{"all"}. See \code{\link{predict}}.}
   \item{validation}{Character.  What kind of (internal) validation to use, matching one of \code{"Mfold"} or 
     \code{"loo"} (see below). Default is \code{"Mfold"}.}
   \item{folds}{The folds in the Mfold cross-validation. See Details.}
@@ -59,7 +78,11 @@ The folds also can be supplied as a list of vectors containing the indexes defin
 fold as produced by \code{split}.
 If \code{validation = "loo"}, leave-one-out cross-validation is performed.
 
-Note that the \code{perf} function will retrieve the \code{keepX} and \code{keepY} inputs from the previously run object. The sPLS, gPLS or sgPLS functions will be run again on several and different subsets of data (the cross-folds) and certainly on different subset of selected features. For sPLS, the MSEP, \eqn{R^2}, and \eqn{Q^2} criteria are averaged across all folds. A feature stability measure is output for the user to assess how often the variables are selected across all folds.
+For fitted sPLS-DA, gPLS-DA and sgPLS-DA models, \code{perf} estimates the classification error rate 
+using cross-validation. 
+
+Note that the \code{perf} function will retrieve the \code{keepX} and \code{keepY} inputs from the previously run object. The sPLS, gPLS, sgPLS, sPLSda, gPLSda or sgPLSda functions will be run again on several and different subsets of data (the cross-folds) and certainly on different subset of selected features. For sPLS, the MSEP, \eqn{R^2}, and \eqn{Q^2} criteria are averaged across all folds. A feature stability measure is output for the user to assess how often the variables are selected across all folds. For sPLS-DA, the classification erro rate is averaged across all folds.
+
 }
 
 \value{
@@ -71,6 +94,10 @@ Note that the \code{perf} function will retrieve the \code{keepX} and \code{keep
     a matrix of \eqn{Q^2} values for each \eqn{Y}-variable. Note that in the specific case of an sPLS model, it is better to have a look at the Q2.total criterion, only applies to object inherited from from \code{"sPLS"}, \code{"gPLS"} and \code{"sgPLS"}.}
     \item{Q2.total}{a vector of \eqn{Q^2}-total values for models with \eqn{1, \ldots ,}\code{ncomp} components, only applies to object inherited from from \code{"sPLS"}, \code{"gPLS"} and \code{"sgPLS"}.}
     \item{features}{a list of features selected across the folds (\code{$stable.X} and \code{$stable.Y}) or on the whole data set (\code{$final}) for the \code{keepX} and \code{keepY} parameters from the input object.}
+    \item{error.rate}{
+For sPLS-DA, gPLS-DA and sgPLS-DA models, \code{perf} produces a matrix of classification error rate estimation. 
+The dimensions correspond to the components in the model and to the prediction method used, respectively. Note that error rates reported in any component include the performance of the model in earlier components for the specified \code{keepX} parameters (e.g. error rate reported for component 3 for \code{keepX = 20} already includes the fitted model on components 1 and 2 for  \code{keepX = 20}). For more advanced usage of the \code{perf} function, see \url{www.mixomics.org/methods/spls-da/} and consider using the \code{predict} function.}
+
 }
 
 \references{	

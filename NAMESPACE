@@ -1,14 +1,24 @@
 import(mixOmics)
 export(sgPLS,gPLS,sPLS,per.variance,plotcim,select.sgpls,select.spls,normv,
 soft.thresholding,soft.thresholding.group,soft.thresholding.sparse.group,lambda.quadra,
-step1.spls.sparsity,step1.sparse.group.spls.sparsity,step1.group.spls.sparsity,step2.spls,perf,perf.sPLS,perf.gPLS,perf.sgPLS,predict.sPLS,predict.gPLS,predict.sgPLS,tuning.gPLS.X,tuning.sgPLS.X,tuning.sPLS.X)
+step1.spls.sparsity,step1.sparse.group.spls.sparsity,step1.group.spls.sparsity,step2.spls,perf,perf.sPLS,perf.gPLS,perf.sgPLS,predict.sPLS,predict.gPLS,predict.sgPLS,tuning.gPLS.X,tuning.sgPLS.X,tuning.sPLS.X,sgPLSda,gPLSda,sPLSda)
 importFrom("stats", "coefficients", "cor", "lm", "predict", "uniroot","var")
 importFrom("utils", "setTxtProgressBar", "txtProgressBar")
+importFrom("mvtnorm", "rmvnorm")
 
 S3method(predict, sPLS)
 S3method(predict, gPLS)
 S3method(predict, sgPLS)
 
+S3method(predict, sPLSda)
+S3method(predict, gPLSda)
+S3method(predict, sgPLSda)
+
+
 S3method(perf, sPLS)
 S3method(perf, gPLS)
 S3method(perf, sgPLS)
+
+S3method(perf, sPLSda)
+S3method(perf, gPLSda)
+S3method(perf, sgPLSda)

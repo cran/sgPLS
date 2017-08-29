@@ -1,4 +1,4 @@
-gPLS <- function(X,Y,ncomp,mode="regression",max.iter=500,tol=1e-06,keepX ,keepY=NULL,ind.block.x,ind.block.y=NULL){
+gPLS <- function(X,Y,ncomp,mode="regression",max.iter=500,tol=1e-06,keepX ,keepY=NULL,ind.block.x,ind.block.y=NULL,scale=TRUE){
   X <- as.matrix(X)
   Y <- as.matrix(Y)
   q <- ncol(Y)
@@ -27,10 +27,11 @@ gPLS <- function(X,Y,ncomp,mode="regression",max.iter=500,tol=1e-06,keepX ,keepY
   mat.c <-matrix(nrow = p, ncol = ncomp)
   mat.d <- matrix(nrow = q, ncol = ncomp)
   mat.e <- matrix(nrow = q, ncol = ncomp)
+  mat.t <- matrix(nrow = n, ncol = ncomp)
+  mat.u <- matrix(nrow = n, ncol = ncomp)
   
-  
-  X.s <- scale(X)
-  Y.s <- scale(Y)
+  X.s <- scale(X,scale=scale)
+  Y.s <- scale(Y,scale=scale)
   
   sparsity.x <- length(ind.block.x)+1-keepX
   if(is.null(ind.block.y)) {sparsity.y <- rep(0,ncomp)} else {
@@ -46,13 +47,16 @@ gPLS <- function(X,Y,ncomp,mode="regression",max.iter=500,tol=1e-06,keepX ,keepY
   if (mode=="regression") mat.d[,1] <- res.deflat$d else mat.e[,1] <- res.deflat$e
   load.u <- res.load$u.tild.new
   load.v <- res.load$v.tild.new
-  
+  mat.t[, 1] <- X.s%*%load.u
+  mat.u[, 1] <- Y.s%*%load.v
   if(ncomp>1) {
     
     for (h in 2:ncomp) {
       res.load <- step1.group.spls.sparsity(X=res.deflat$X.h,Y=res.deflat$Y.h,ind.block.x=ind.block.x,ind.block.y=ind.block.y,sparsity.x=sparsity.x[h],sparsity.y=sparsity.y[h],epsilon=tol,iter.max=max.iter)
       load.u <- cbind(load.u,res.load$u.tild.new)
       load.v <- cbind(load.v,res.load$v.tild.new)
+      mat.t[, h] <- res.deflat$X.h%*%res.load$u.tild.new
+      mat.u[, h] <- res.deflat$Y.h%*%res.load$v.tild.new 
       res.deflat <- step2.spls(X=res.deflat$X.h,Y=res.deflat$Y.h,res.load$u.tild.new,res.load$v.tild.new,mode=mode)
       mat.c[,h] <- res.deflat$c
       if (mode=="regression") mat.d[,h] <- res.deflat$d else mat.e[,h] <- res.deflat$e
@@ -62,8 +66,8 @@ gPLS <- function(X,Y,ncomp,mode="regression",max.iter=500,tol=1e-06,keepX ,keepY
     load.v <- matrix(load.v,ncol=1)
   }
   
-  mat.t <- X.s%*%load.u
-  mat.u <- Y.s%*%load.v
+ # mat.t <- X.s%*%load.u
+ # mat.u <- Y.s%*%load.v
        # mat.c regressor for X
        # mat.d regressor for Y "regression mode"
        # mat.e regressor for Y "canonical mode"
@@ -71,6 +75,12 @@ gPLS <- function(X,Y,ncomp,mode="regression",max.iter=500,tol=1e-06,keepX ,keepY
   if (is.null(keepY)){
     if (is.null(ind.block.y)) keepY <- rep(ncol(Y),ncomp) else keepY <- rep(length(ind.block.y)+1,ncomp)
   } 
+  rownames(load.u) <- X.names
+  rownames(load.v) <- Y.names
+  
+  dim = paste("comp", 1:ncomp)
+  colnames(load.u) = colnames(load.v) = dim
+ # colnames(mat.a) = colnames(mat.b) = colnames(mat.c) = dim 
   
   result <- list(call = cl,X=X.s,Y=Y.s,ncomp=ncomp,mode=mode,keepX=keepX,keepY=keepY,mat.c=mat.c,mat.d=mat.d,mat.e=mat.e,loadings = list(X = load.u, Y = load.v),variates = list(X = mat.t, Y = mat.u),
                  names = list(X = X.names,Y = Y.names, indiv = ind.names),tol=tol,max.iter=max.iter,iter=iter,ind.block.x=ind.block.x,ind.block.y=ind.block.y)

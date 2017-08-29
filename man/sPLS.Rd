@@ -12,7 +12,7 @@ in a one-step strategy.
 \usage{
 sPLS(X, Y, ncomp, mode = "regression",
      max.iter = 500, tol = 1e-06, keepX = rep(ncol(X), ncomp), 
-     keepY = rep(ncol(Y), ncomp))
+     keepY = rep(ncol(Y), ncomp),scale=TRUE)
 }	
 
 \arguments{
@@ -27,6 +27,8 @@ sPLS(X, Y, ncomp, mode = "regression",
     to keep in \eqn{X}-loadings. By default all variables are kept in the model.}
   \item{keepY}{Numeric vector of length \code{ncomp}, the number of variables
     to keep in \eqn{Y}-loadings. By default all variables are kept in the model.}
+    \item{scale}{a logical indicating if the orignal data set need to be scaled. By default \code{scale}=TRUE}
+
 }
 
 \details{
@@ -82,7 +84,7 @@ In: Krishnaiah, P. R. (editors), \emph{Multivariate Analysis}. Academic Press, N
 \seealso{\code{\link{gPLS}}, \code{\link{sgPLS}}, \code{\link{predict}}, \code{\link{perf}} and functions from \code{mixOmics} package: \code{summary}, \code{plotIndiv}, \code{plotVar}, \code{plot3dIndiv}, \code{plot3dVar}.}
 
 \examples{
-\dontrun{	
+
 ## Simulation of datasets X and Y with group variables
 n <- 100
 sigma.gamma <- 1
@@ -130,7 +132,7 @@ model.sPLS <- sPLS(X, Y, ncomp = 2, mode = "regression", keepX = c(60, 60),
 result.sPLS <- select.spls(model.sPLS)
 result.sPLS$select.X
 result.sPLS$select.Y
-}
+
 }
 
 \keyword{regression}

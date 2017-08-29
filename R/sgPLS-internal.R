@@ -33,13 +33,12 @@ soft.thresholding.sparse.group <- function(x,ind,lambda,alpha,ind.block.zero){
     vecx <- x[((tab.ind[i]+1):tab.ind[i+1])]
     if(i%in%ind.block.zero) {vecx <- rep(0,ji)} else{
       temp <- soft.thresholding(vecx,lambda*alpha/2)
-      vecx <- 0.5*temp*(1-lambda*(1-alpha)*sqrt(length(vecx))/sqrt(sum(temp**2))) 
+      vecx <- temp*(1-lambda*(1-alpha)/2*sqrt(length(vecx))/sqrt(sum(temp**2))) 
     }
     res <- c(res,vecx)  
   }
   return(res)    
 }
-
 
 
 lambda.quadra <- function(x,vec,alpha){
@@ -57,13 +56,14 @@ step1.spls.sparsity <- function(X,Y,sparsity.x,sparsity.y,epsilon,iter.max){
   iter <- 0
   #|(norm(v.tild.old-v.tild.previous)>epsilon)) TO BE ADDED PROBLEM IN MIXOMICS ???
   ### Step c
-  while (((normv(u.tild.old-u.tild.previous)/normv(u.tild.old))>epsilon)  & (iter <iter.max))  {
+  #while (((normv(u.tild.old-u.tild.previous)/normv(u.tild.old))>epsilon)  & (iter <iter.max))
+  while (((normv(u.tild.old-u.tild.previous)**2)>epsilon)  & (iter <iter.max))  {
     if(sparsity.x==0) {lambda.x <- 0} else{
       lambda.x <- sort(abs(Z%*%matrix(v.tild.old,ncol=1)))[sparsity.x]}
     u.tild.new <- soft.thresholding(Z%*%matrix(v.tild.old,ncol=1),lambda=lambda.x)
     u.tild.new <- u.tild.new/sqrt(sum(u.tild.new**2))
-    if(sparsity.y==0) lambda.y <- 0 else lambda.y <- sort(abs(t(Z)%*%matrix(u.tild.old,ncol=1)))[sparsity.y]
-    v.tild.new <- soft.thresholding(t(Z)%*%matrix(u.tild.old,ncol=1),lambda=lambda.y)
+    if(sparsity.y==0) lambda.y <- 0 else lambda.y <- sort(abs(t(Z)%*%matrix(u.tild.new,ncol=1)))[sparsity.y]
+    v.tild.new <- soft.thresholding(t(Z)%*%matrix(u.tild.new,ncol=1),lambda=lambda.y)
     v.tild.new <- v.tild.new/sqrt(sum(v.tild.new**2))
     
     u.tild.previous <- u.tild.old
@@ -108,8 +108,12 @@ step1.sparse.group.spls.sparsity <- function(X,Y,ind.block.x,ind.block.y,sparsit
     index.block.zero.x <- which(lamb.x<=lambda.x)
     
     
+    u.tild.new <- soft.thresholding.sparse.group(Z%*%matrix(v.tild.old,ncol=1),ind=ind.block.x,lambda=lambda.x,alpha=alpha.x,ind.block.zero=index.block.zero.x)
+    
+    u.tild.new <- u.tild.new/sqrt(sum(u.tild.new**2))
+    
     if(sparsity.y==0) {lambda.y <- 0} else { 
-      vecZV <- t(Z)%*%matrix(u.tild.old,ncol=1)
+      vecZV <- t(Z)%*%matrix(u.tild.new,ncol=1)
       tab.ind <- c(0,ind.block.y,length(vecZV))
       lamb.y <- NULL
       lamb.max <- 100000
@@ -123,12 +127,8 @@ step1.sparse.group.spls.sparsity <- function(X,Y,ind.block.x,ind.block.y,sparsit
       index.block.zero.y <- which(lamb.y<=lambda.y)
     }
     
-    u.tild.new <- soft.thresholding.sparse.group(Z%*%matrix(v.tild.old,ncol=1),ind=ind.block.x,lambda=lambda.x,alpha=alpha.x,ind.block.zero=index.block.zero.x)
-    
-    u.tild.new <- u.tild.new/sqrt(sum(u.tild.new**2))
-    
-    if(sparsity.y==0) {v.tild.new <- t(Z)%*%matrix(u.tild.old,ncol=1)} else {
-      v.tild.new <- soft.thresholding.sparse.group(t(Z)%*%matrix(u.tild.old,ncol=1),ind=ind.block.y,lambda=lambda.y,alpha=alpha.y,ind.block.zero=index.block.zero.y)
+    if(sparsity.y==0) {v.tild.new <- t(Z)%*%matrix(u.tild.new,ncol=1)} else {
+      v.tild.new <- soft.thresholding.sparse.group(t(Z)%*%matrix(u.tild.new,ncol=1),ind=ind.block.y,lambda=lambda.y,alpha=alpha.y,ind.block.zero=index.block.zero.y)
     }
     
     v.tild.new <- v.tild.new/sqrt(sum(v.tild.new**2))
@@ -172,10 +172,12 @@ step1.group.spls.sparsity <- function(X,Y,ind.block.x,ind.block.y,sparsity.x,spa
     }
     if(sparsity.x==0) lambda.x <- 0 else{
       lambda.x <- sort(res)[sparsity.x]}
-    
+        
+    u.tild.new <- soft.thresholding.group(Z%*%matrix(v.tild.old,ncol=1),ind=ind.block.x,lambda=lambda.x)
+    u.tild.new <- u.tild.new/sqrt(sum(u.tild.new**2))
     
     if(sparsity.y==0) {lambda.y <- 0} else { 
-      vecZV <- t(Z)%*%matrix(u.tild.old,ncol=1)
+      vecZV <- t(Z)%*%matrix(u.tild.new,ncol=1)
       tab.ind <- c(0,ind.block.y,length(vecZV))
       res <- NULL
       for (i in 1:(length(ind.block.y)+1)){
@@ -187,11 +189,9 @@ step1.group.spls.sparsity <- function(X,Y,ind.block.x,ind.block.y,sparsity.x,spa
       lambda.y <- sort(res)[sparsity.y]}
     
     
-    u.tild.new <- soft.thresholding.group(Z%*%matrix(v.tild.old,ncol=1),ind=ind.block.x,lambda=lambda.x)
-    u.tild.new <- u.tild.new/sqrt(sum(u.tild.new**2))
     
-    if(sparsity.y==0) {v.tild.new <- t(Z)%*%matrix(u.tild.old,ncol=1)} else {
-      v.tild.new <- soft.thresholding.group(t(Z)%*%matrix(u.tild.old,ncol=1),ind=ind.block.y,lambda=lambda.y)}
+    if(sparsity.y==0) {v.tild.new <- t(Z)%*%matrix(u.tild.new,ncol=1)} else {
+      v.tild.new <- soft.thresholding.group(t(Z)%*%matrix(u.tild.new,ncol=1),ind=ind.block.y,lambda=lambda.y)}
     
     v.tild.new <- v.tild.new/sqrt(sum(v.tild.new**2))
        

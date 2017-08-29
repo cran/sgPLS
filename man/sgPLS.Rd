@@ -10,7 +10,7 @@
 sgPLS(X, Y, ncomp, mode = "regression",
      max.iter = 500, tol = 1e-06, keepX, 
      keepY = NULL,ind.block.x, ind.block.y = NULL, alpha.x, alpha.y = NULL,
-     upper.lambda = 10 ^ 5)
+     upper.lambda = 10 ^ 5,scale=TRUE)
 }	
 
 \arguments{
@@ -30,6 +30,8 @@ sgPLS(X, Y, ncomp, mode = "regression",
    \item{alpha.x}{The mixing parameter (value between 0 and 1) related to the sparsity within group for the \eqn{X} dataset.}
     \item{alpha.y}{The mixing parameter (value between 0 and 1) related to the sparsity within group for the \eqn{Y} dataset.}
     \item{upper.lambda}{By default \code{upper.lambda=10 ^ 5}. A large value specifying the upper bound of the intervall of lambda values for searching the value of the tuning parameter (lambda) corresponding to a non-zero group of variables.}
+    \item{scale}{a logical indicating if the orignal data set need to be scaled. By default \code{scale}=TRUE}
+
 }
 
 \details{
@@ -43,7 +45,7 @@ algorithms are available: gPLS regression \code{("regression")} and gPLS canonic
 \code{ind.block.x <- c(3, 10, 15)} means that \eqn{X} is structured into 4 groups: X1 to X3; X4 to X10, X11 to X15 and X16 to X\eqn{p} where \eqn{p} is the number of variables in the \eqn{X} matrix.}
 
 \value{
-\code{gPLS} returns an object of class \code{"gPLS"}, a list 
+\code{sgPLS} returns an object of class \code{"sgPLS"}, a list 
 that contains the following components:
 
   \item{X}{The centered and standardized original predictor matrix.}
@@ -68,7 +70,7 @@ that contains the following components:
 }
 
 \references{
-Liquet Benoit, Lafaye de Micheaux, Boris Hejblum, Rodolphe Thiebaut. A group and Sparse Group Partial Least Square approach applied in Genomics context. \emph{Submitted}.
+Liquet Benoit, Lafaye de Micheaux, Boris Hejblum, Rodolphe Thiebaut (2016). A group and Sparse Group Partial Least Square approach applied in Genomics context. \emph{Bioinformatics}.
 
 L\^e Cao, K.-A., Martin, P.G.P., Robert-Grani\'e, C. and Besse, P. (2009). Sparse canonical methods for biological data integration: application to a cross-platform study. \emph{BMC Bioinformatics} \bold{10}:34.
 
@@ -90,7 +92,7 @@ In: Krishnaiah, P. R. (editors), \emph{Multivariate Analysis}. Academic Press, N
 \seealso{\code{\link{sPLS}}, \code{\link{sgPLS}}, \code{\link{predict}}, \code{\link{perf}} and functions from \code{mixOmics} package: \code{summary}, \code{plotIndiv}, \code{plotVar}, \code{plot3dIndiv}, \code{plot3dVar}.}
 
 \examples{
-\dontrun{	
+	
 ## Simulation of datasets X and Y with group variables
 n <- 100
 sigma.gamma <- 1
@@ -140,6 +142,6 @@ result.sgPLS <- select.sgpls(model.sgPLS)
 result.sgPLS$group.size.X
 result.sgPLS$group.size.Y
 }
-}
+
 \keyword{regression}
 \keyword{multivariate}

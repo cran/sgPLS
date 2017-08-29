@@ -13,7 +13,7 @@
 \usage{
 gPLS(X, Y, ncomp, mode = "regression",
      max.iter = 500, tol = 1e-06, keepX, 
-     keepY = NULL, ind.block.x, ind.block.y = NULL)
+     keepY = NULL, ind.block.x, ind.block.y = NULL,scale=TRUE)
 }	
 
 \arguments{
@@ -30,6 +30,7 @@ gPLS(X, Y, ncomp, mode = "regression",
     to keep in \eqn{Y}-loadings. By default all variables are kept in the model.}
    \item{ind.block.x}{a vector of integers describing the grouping of the \eqn{X}-variables. (see an example in Details section)}
    \item{ind.block.y}{a vector of consecutive integers describing the grouping of the \eqn{Y}-variables (see an example in Details section)}
+   \item{scale}{a logical indicating if the orignal data set need to be scaled. By default \code{scale}=TRUE}
 }
 
 \details{
@@ -88,7 +89,7 @@ In: Krishnaiah, P. R. (editors), \emph{Multivariate Analysis}. Academic Press, N
 \seealso{\code{\link{sPLS}}, \code{\link{sgPLS}}, \code{\link{predict}}, \code{\link{perf}}, \code{\link{cim}} and functions from \code{mixOmics} package: \code{summary}, \code{plotIndiv}, \code{plotVar}, \code{plot3dIndiv}, \code{plot3dVar}.}
 
 \examples{
-\dontrun{	
+	
 ## Simulation of datasets X and Y with group variables
 n <- 100
 sigma.gamma <- 1
@@ -137,7 +138,7 @@ result.gPLS <- select.sgpls(model.gPLS)
 result.gPLS$group.size.X
 result.gPLS$group.size.Y
 }
-}
+
 
 \keyword{regression}
 \keyword{multivariate}
