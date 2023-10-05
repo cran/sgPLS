@@ -96,7 +96,7 @@ Note that the \code{perf} function will retrieve the \code{keepX} and \code{keep
     \item{features}{a list of features selected across the folds (\code{$stable.X} and \code{$stable.Y}) or on the whole data set (\code{$final}) for the \code{keepX} and \code{keepY} parameters from the input object.}
     \item{error.rate}{
 For sPLS-DA, gPLS-DA and sgPLS-DA models, \code{perf} produces a matrix of classification error rate estimation. 
-The dimensions correspond to the components in the model and to the prediction method used, respectively. Note that error rates reported in any component include the performance of the model in earlier components for the specified \code{keepX} parameters (e.g. error rate reported for component 3 for \code{keepX = 20} already includes the fitted model on components 1 and 2 for  \code{keepX = 20}). For more advanced usage of the \code{perf} function, see \url{www.mixomics.org/methods/spls-da/} and consider using the \code{predict} function.}
+The dimensions correspond to the components in the model and to the prediction method used, respectively. Note that error rates reported in any component include the performance of the model in earlier components for the specified \code{keepX} parameters (e.g. error rate reported for component 3 for \code{keepX = 20} already includes the fitted model on components 1 and 2 for  \code{keepX = 20}). For more advanced usage of the \code{perf} function, see mixOmics package and consider using the \code{predict} function.}
 
 }
 
