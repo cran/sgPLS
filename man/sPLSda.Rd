@@ -55,8 +55,8 @@ Le Cao, K.-A., Boitard, S. and Besse, P. (2011). Sparse PLS Discriminant Analysi
 \author{Benoit Liquet and Pierre Lafaye de Micheaux.}
 
 \seealso{\code{\link{sPLS}}, \code{\link{summary}}, 
-\code{\link{plotIndiv}}, \code{\link{plotVar}}, 
-\code{\link{cim}}, \code{\link{network}}, \code{\link{predict}}, \code{\link{perf}} and http://www.mixOmics.org for more details.}
+\code{\link[mixOmics]{plotIndiv}}, \code{\link[mixOmics]{plotVar}}, 
+\code{\link[mixOmics]{cim}}, \code{\link[mixOmics]{network}}, \code{\link{predict}}, \code{\link{perf}} and http://www.mixOmics.org for more details.}
 
 \examples{
 ### Examples from mixOmics packages	
